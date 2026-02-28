@@ -7,6 +7,7 @@ import com.cfs.student_api.entity.Student;
 import com.cfs.student_api.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,9 +34,16 @@ public class StudentController {
 
     //2- Get all students
     @GetMapping
-    public ResponseEntity<PaginationResponseDTO> getAllStudents (@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-        Pageable pageable = PageRequest.of(page,size);   //ye pageable object krta h, isko service ko pass krte h
-        PaginationResponseDTO response = studentService.getAllStudents(pageable);
+    public ResponseEntity<PaginationResponseDTO> getAllStudents (@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id") String sortBy, @RequestParam(defaultValue = "asc") String direction, @RequestParam(required = false) String name) {
+
+        //create Sort object
+        Sort sort = direction.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() :
+                Sort.by(sortBy).ascending();
+
+        //create Pageable object
+        Pageable pageable = PageRequest.of(page,size, sort);   //ye pageable object krta h, isko service ko pass krte h
+        PaginationResponseDTO response = studentService.getAllStudents(name, pageable);
 
         return ResponseEntity.ok(response);
     }

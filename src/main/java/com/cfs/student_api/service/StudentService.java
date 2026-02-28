@@ -70,9 +70,16 @@ public class StudentService {
 //    }
 
     //Method - 2  - new method (data + pagination info)
-    public PaginationResponseDTO getAllStudents (Pageable pageable) {
+    public PaginationResponseDTO getAllStudents (String name, Pageable pageable) {
         //fetch paginated data from DB
-        Page<Student> studentPage = studentRepository.findAll(pageable);
+        Page<Student> studentPage;
+
+        //appyly filtering if name is provided
+        if (name != null && !name.trim().isEmpty()) {
+            studentPage = studentRepository.findByNameContaining(name, pageable);
+        } else {
+            studentPage = studentRepository.findAll(pageable);
+        }
 
         //extract actual student list from Page object
         List<Student> students = studentPage.getContent();
