@@ -1,14 +1,16 @@
 package com.cfs.student_api.controller;
 
+import com.cfs.student_api.dto.PaginationResponseDTO;
 import com.cfs.student_api.dto.StudentRequestDTO;
 import com.cfs.student_api.dto.StudentResponseDTO;
 import com.cfs.student_api.entity.Student;
 import com.cfs.student_api.service.StudentService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @RestController   // REST api bnane k liye
@@ -31,10 +33,11 @@ public class StudentController {
 
     //2- Get all students
     @GetMapping
-    public ResponseEntity<List<StudentResponseDTO>> getAllStudents () {
-        List<StudentResponseDTO> students = studentService.getAllStudents();
+    public ResponseEntity<PaginationResponseDTO> getAllStudents (@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page,size);   //ye pageable object krta h, isko service ko pass krte h
+        PaginationResponseDTO response = studentService.getAllStudents(pageable);
 
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(response);
     }
 
     //3- get student by id

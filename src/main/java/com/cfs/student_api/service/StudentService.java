@@ -1,14 +1,16 @@
 package com.cfs.student_api.service;
 
+import com.cfs.student_api.dto.PaginationResponseDTO;
 import com.cfs.student_api.dto.StudentRequestDTO;
 import com.cfs.student_api.dto.StudentResponseDTO;
 import com.cfs.student_api.entity.Student;
 import com.cfs.student_api.exception.StudentNotFoundException;
 import com.cfs.student_api.repo.StudentRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.*;
 
 @Service
 public class StudentService {
@@ -45,26 +47,57 @@ public class StudentService {
         return response;
     }
 
-    //Method - 2
-    public List<StudentResponseDTO> getAllStudents() {
+    //Method - 2  - old method (data only)
+//    public List<StudentResponseDTO> getAllStudents() {
+//
+//        //DB se sab students lo
+//        List<Student> students = studentRepository.findAll();
+//
+//        //Entity list ko DTO list me convert kro
+//        List<StudentResponseDTO> responseList = new ArrayList<>();
+//
+//        for (Student student : students) {
+//            StudentResponseDTO dto = new StudentResponseDTO();
+//
+//            dto.setId(student.getId());
+//            dto.setName(student.getName());
+//            dto.setEmail(student.getEmail());
+//            dto.setAge(student.getAge());
+//            responseList.add(dto);
+//        }
+//
+//        return responseList;
+//    }
 
-        //DB se sab students lo
-        List<Student> students = studentRepository.findAll();
+    //Method - 2  - new method (data + pagination info)
+    public PaginationResponseDTO getAllStudents (Pageable pageable) {
+        //fetch paginated data from DB
+        Page<Student> studentPage = studentRepository.findAll(pageable);
 
-        //Entity list ko DTO list me convert kro
-        List<StudentResponseDTO> responseList = new ArrayList<>();
+        //extract actual student list from Page object
+        List<Student> students = studentPage.getContent();
 
+        //convert entity list to dto list
+        List<StudentResponseDTO> dtoList = new ArrayList<>();
         for (Student student : students) {
             StudentResponseDTO dto = new StudentResponseDTO();
-
             dto.setId(student.getId());
             dto.setName(student.getName());
             dto.setEmail(student.getEmail());
             dto.setAge(student.getAge());
-            responseList.add(dto);
+            dtoList.add(dto);
         }
 
-        return responseList;
+        //create custom pagination response
+        PaginationResponseDTO response = new PaginationResponseDTO(
+                dtoList,
+                studentPage.getNumber(),   //current page no.
+                studentPage.getSize(),     //page size
+                studentPage.getTotalElements(),   //total records in db
+                studentPage.getTotalPages(),     //total pages
+                studentPage.isLast()      //is this last page?
+        );
+        return response;
     }
 
     //Method - 3
