@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -34,6 +35,7 @@ public class StudentController {
 
     //2- Get all students
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<PaginationResponseDTO> getAllStudents (@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id") String sortBy, @RequestParam(defaultValue = "asc") String direction, @RequestParam(required = false) String name) {
 
         //create Sort object
@@ -66,6 +68,7 @@ public class StudentController {
 
     //5- delete student
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
 
