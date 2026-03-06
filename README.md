@@ -4,126 +4,292 @@
 
 This is a backend REST API project built using Spring Boot.
 
-The purpose of this project is to manage student data using proper backend architecture and industry-level best practices.
+The purpose of this project is to manage student data while following clean backend architecture and industry-level best practices.
 
-This project demonstrates:
+This project demonstrates how a real backend system is designed with proper structure, security, and scalable design principles.
+
+The project includes:
 
 - REST API development
 - Layered architecture (Controller → Service → Repository)
-- DTO usage
+- DTO pattern
 - Input validation
 - Global exception handling
 - MySQL database integration
 - Pagination
 - Sorting
 - Filtering
-- Clean JSON responses
+- Authentication and Authorization
+- JWT-based security
+- Password encryption
 
-This project is built to strengthen backend fundamentals for full-stack development and placement preparation.
+This project was built for strengthening backend fundamentals for full-stack development and placement preparation.
 
 ---
 
-## Technologies Used
+# Technologies Used
 
 - Java
 - Spring Boot
 - Spring Web
 - Spring Data JPA
 - Hibernate
+- Spring Security
+- JWT (JSON Web Token)
 - MySQL
 - Maven
-- Postman (for API testing)
+- Postman (API testing)
 
 ---
 
-## Project Architecture
+# Project Architecture
 
-The project follows layered architecture:
+The project follows Layered Architecture which is widely used in industry.
 
 Controller Layer  
-Handles HTTP requests and sends responses.
+Handles HTTP requests and returns API responses.
 
 Service Layer  
-Contains business logic and decision making.
+Contains business logic and processing rules.
 
 Repository Layer  
-Communicates with database using JPA.
+Handles database communication using Spring Data JPA.
 
 DTO Layer  
-Used to transfer data between client and server safely.
+Transfers safe and controlled data between client and server.
 
 Entity Layer  
 Represents database table structure.
 
+Security Layer  
+Handles authentication, authorization, and request filtering.
+
 Exception Layer  
-Handles errors globally and returns structured JSON responses.
+Handles application errors globally.
 
 ---
 
-## Features Implemented
+# Features Implemented
+
+## Student Management
 
 1. Add Student (POST)
 2. Get Student By ID (GET)
 3. Update Student (PUT)
 4. Delete Student (DELETE)
-5. Input Validation using @Valid
-6. Global Exception Handling
-7. Clean structured JSON error responses
-8. DTO-based request and response structure
-9. Pagination support
-10. Sorting support
-11. Filtering by name (contains search)
+5. Pagination support
+6. Sorting support
+7. Filtering by name
 
 ---
 
-## API Endpoints
+# Input Validation
 
-Base URL:
+Validation implemented using:
+
+- @NotBlank
+- @Email
+- @NotNull
+- @Min
+
+If validation fails, API returns structured JSON response.
+
+---
+
+# Global Exception Handling
+
+Handled using:
+
+`@ControllerAdvice`
+
+Exceptions handled:
+
+- StudentNotFoundException
+- ValidationException
+
+Example error response:
+
+```json
+{
+  "status": 404,
+  "message": "Student not found"
+}
+```
+
+---
+
+# Authentication and Security
+
+Security is implemented using Spring Security and JWT Authentication.
+
+The project supports:
+
+- User registration
+- User login
+- Password encryption
+- Role-based authorization
+- JWT token authentication
+
+---
+
+# Password Encryption
+
+Passwords are encrypted using:
+
+`BCryptPasswordEncoder`
+
+Example:
+
+```
+admin123
+↓
+$2a$10$sd8f7sdf8sd...
+```
+
+Passwords are never stored in plain text.
+
+---
+
+# User Roles
+
+Two roles are implemented:
+
+```
+ADMIN
+USER
+```
+
+Example authorization:
+
+```
+ADMIN → Can delete students
+USER → Limited access
+```
+
+Role-based security is implemented using:
+
+`@PreAuthorize`
+
+---
+
+# JWT Authentication
+
+JWT is used for stateless authentication.
+
+Authentication flow:
+
+```
+Client Login
+↓
+Server verifies username and password
+↓
+JWT Token generated
+↓
+Client stores token
+↓
+Client sends token in Authorization header
+↓
+JWT Filter verifies token
+↓
+Request allowed to access API
+```
+
+Example header:
+
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+---
+
+# API Endpoints
+
+## Student APIs
+
+Base URL
+
 ```
 /students
 ```
 
-### 1. Add Student
+### Add Student
+
+```
 POST /students
+```
 
-### 2. Get Student By ID
+### Get Student By ID
+
+```
 GET /students/{id}
+```
 
-### 3. Update Student
+### Update Student
+
+```
 PUT /students/{id}
+```
 
-### 4. Delete Student
+### Delete Student
+
+```
 DELETE /students/{id}
-
-### 5. Get All Students (Pagination + Sorting + Filtering)
-
-Example Requests:
-
-Pagination:
-```
-GET /students?page=0&size=5
-```
-
-Sorting:
-```
-GET /students?page=0&size=5&sortBy=age&direction=desc
-```
-
-Filtering by name:
-```
-GET /students?name=ra&page=0&size=5
-```
-
-Combined:
-```
-GET /students?name=ra&page=0&size=5&sortBy=age&direction=asc
 ```
 
 ---
 
-## Pagination
+# Authentication APIs
 
-Pagination allows fetching data page by page instead of loading all records at once.
+## Register User
+
+```
+POST /auth/register
+```
+
+Example Request
+
+```json
+{
+ "username": "rocky",
+ "password": "rocky123",
+ "role": "ADMIN"
+}
+```
+
+---
+
+## Login
+
+```
+POST /auth/login
+```
+
+Example Request
+
+```json
+{
+ "username": "rocky",
+ "password": "rocky123"
+}
+```
+
+Response
+
+```
+JWT Token
+```
+
+---
+
+# Pagination
+
+Pagination allows retrieving data in small pages instead of loading all records at once.
+
+Example:
+
+```
+GET /students?page=0&size=5
+```
 
 Response includes:
 
@@ -134,7 +300,7 @@ Response includes:
 - totalPages
 - last
 
-Example Response:
+Example response:
 
 ```json
 {
@@ -149,131 +315,111 @@ Example Response:
 
 ---
 
-## Sorting
+# Sorting
 
-Sorting allows ordering data by any field.
-
-Parameters:
-
-- sortBy (field name)
-- direction (asc / desc)
+Sorting allows ordering records by any field.
 
 Example:
+
 ```
 GET /students?sortBy=name&direction=asc
 ```
 
 ---
 
-## Filtering
+# Filtering
 
 Filtering allows searching students by name.
 
-Current implementation:
-
-- name contains search (LIKE %value%)
-
 Example:
+
 ```
 GET /students?name=ra
 ```
 
----
+Implementation uses JPA query method:
 
-## Validation Handling
-
-Validation is implemented using:
-
-- @NotBlank
-- @Email
-- @NotNull
-- @Min
-
-If validation fails, the API returns structured JSON:
-
-```json
-{
-  "status": 400,
-  "errors": {
-    "email": "Invalid email format",
-    "name": "Name must not be blank"
-  }
-}
+```
+findByNameContaining
 ```
 
 ---
 
-## Exception Handling
+# Security Flow
 
-Two types of exceptions are handled:
+JWT security request flow:
 
-1. StudentNotFoundException  
-   When student ID does not exist.
-
-2. Validation Exception  
-   When input data is invalid.
-
-GlobalExceptionHandler class handles all exceptions centrally.
-
----
-
-## Why DTO is Used
-
-DTO is used to:
-
-- Hide internal entity structure
-- Avoid exposing database fields directly
-- Improve security
-- Control input and output data
-- Maintain clean architecture
+```
+Client Request
+↓
+JWT Authentication Filter
+↓
+Token Validation
+↓
+UserDetailsService
+↓
+SecurityContextHolder
+↓
+Controller Access
+```
 
 ---
 
-## Database Configuration
+# Database Configuration
 
-Database used: MySQL
+Database used:
 
-Configured in application.properties:
+```
+MySQL
+```
+
+Configured in `application.properties`:
 
 - Database URL
 - Username
 - Password
 - Hibernate ddl-auto
-- Show SQL queries
+- SQL logging
 
 ---
 
-## What I Learned From This Project
+# What I Learned From This Project
 
 - How Spring Boot manages objects using IoC
-- How dependency injection works
+- How Dependency Injection works
 - Difference between Entity and DTO
 - How validation works internally
-- How global exception handling works
-- How pagination works using Pageable
-- How sorting works using Sort
-- How filtering works using method naming in JPA
-- How to structure backend professionally
+- How Global Exception Handling works
+- How Pagination works using Pageable
+- How Sorting works using Sort
+- How Filtering works using JPA query methods
+- How Spring Security works internally
+- How password encryption works using BCrypt
+- How JWT authentication works
+- How request filters work in Spring Security
 
 ---
 
-## Future Improvements
+# Future Improvements
 
-- Multiple filters (age, email)
-- Dynamic filtering using Specification
+Possible future enhancements:
+
 - Swagger API documentation
+- Unit Testing using JUnit and Mockito
 - Logging using SLF4J
-- Unit Testing
-- Role-based authentication using Spring Security
 - Docker containerization
 - Deployment to cloud
+- Dynamic filtering using Specifications
+- Refresh token implementation
 
 ---
 
-## Pros of This Project
+# Pros of This Project
 
 - Clean layered architecture
 - Proper validation handling
+- Secure authentication system
+- JWT-based authorization
 - Structured error responses
 - Pagination and sorting implemented
 - Search functionality added
@@ -281,19 +427,27 @@ Configured in application.properties:
 
 ---
 
-## Limitations
+# Limitations
 
-- No authentication implemented yet
-- Only single-field filtering implemented
-- No unit testing
 - No frontend integration
+- No automated unit testing
+- Limited filtering fields
+- Single microservice architecture
 
 ---
 
-## Conclusion
+# Conclusion
 
-This project demonstrates a production-style backend REST API using Spring Boot.
+This project demonstrates a secure and scalable backend REST API using Spring Boot and Spring Security.
 
-It includes CRUD operations, validation, exception handling, pagination, sorting, and filtering.
+It includes:
+
+- CRUD operations
+- Validation
+- Global exception handling
+- Pagination and sorting
+- Filtering
+- Role-based security
+- JWT authentication
 
 This project builds a strong foundation for developing real-world backend systems and full-stack applications.
